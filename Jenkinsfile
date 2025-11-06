@@ -424,24 +424,24 @@ else:
         failure {
             echo "Pipeline failed!"
             
-            // Send failure notification
-            script {
-                // slackSend(
-                //     channel: env.SLACK_CHANNEL,
-                //     color: 'danger',
-                //     message: ":x: Deployment failed\\n" +
-                //              "Project: ${PROJECT_NAME}\\n" +
-                //              "Environment: ${DEPLOY_ENVIRONMENT}\\n" +
-                //              "Build: ${BUILD_TAG}\\n" +
-                //              "Stage: ${env.STAGE_NAME}"
-                // )
-                
-                // emailext(
-                //     to: env.EMAIL_RECIPIENTS,
-                //     subject: "Deployment Failed: ${PROJECT_NAME} - ${DEPLOY_ENVIRONMENT}",
-                //     body: "Deployment failed at stage: ${env.STAGE_NAME}\\n\\nBuild: ${BUILD_TAG}\\nEnvironment: ${DEPLOY_ENVIRONMENT}\\nCommit: ${GIT_COMMIT}"
-                // )
-            }
+            // Send failure notification (commented out for now)
+            // script {
+            //     slackSend(
+            //         channel: env.SLACK_CHANNEL,
+            //         color: 'danger',
+            //         message: ":x: Deployment failed\\n" +
+            //                  "Project: ${PROJECT_NAME}\\n" +
+            //                  "Environment: ${DEPLOY_ENVIRONMENT}\\n" +
+            //                  "Build: ${BUILD_TAG}\\n" +
+            //                  "Stage: ${env.STAGE_NAME}"
+            //     )
+            //     
+            //     emailext(
+            //         to: env.EMAIL_RECIPIENTS,
+            //         subject: "Deployment Failed: ${PROJECT_NAME} - ${DEPLOY_ENVIRONMENT}",
+            //         body: "Deployment failed at stage: ${env.STAGE_NAME}\\n\\nBuild: ${BUILD_TAG}\\nEnvironment: ${DEPLOY_ENVIRONMENT}\\nCommit: ${GIT_COMMIT}"
+            //     )
+            // }
         }
         
         unstable {
