@@ -39,10 +39,13 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 echo "Pushing images to Docker Hub..."
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
+                withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    script {
                         def services = ['data-simulator', 'ml-service', 'consumer-service', 'dashboard']
                         def version = env.BUILD_NUMBER
+                        
+                        // Login to Docker Hub
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                         
                         services.each { service ->
                             echo "Pushing ${service}..."
