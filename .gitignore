@@ -108,6 +108,10 @@ backup_*/
 # Jenkins local data
 .jenkins/
 
+# Jenkins setup documentation (local only)
+JENKINS_SETUP.md
+JENKINS_CHECKLIST.md
+
 # Compiled files
 *.com
 *.class

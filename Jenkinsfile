@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_REGISTRY = "your-registry.com"  // Replace with your Docker registry
+        DOCKER_REGISTRY = "raksharane"  // Docker Hub registry
         PROJECT_NAME = "aircraft-engine-monitoring"
         DOCKER_COMPOSE_FILE = "docker-compose.yml"
         
