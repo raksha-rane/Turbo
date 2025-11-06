@@ -27,19 +27,27 @@ This system provides:
 - **Jenkins**: CI/CD automation
 - **Docker Compose**: Service orchestration
 
+## Architecture Diagram
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│      Data       │    │     Apache      │    │    ML Service   │
+│    Simulator    │───▶│     Kafka       │───▶│  (scikit-learn) │
+│  (Telemetry)    │    │  (Streaming)    │    │   RUL + Anomaly │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                 │                       │
-                                │                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Streamlit     │◄───┤    Consumer     │    │      Redis      │
-│   Dashboard     │    │    Service      │    │     (Cache)     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │   PostgreSQL    │
-                       │   (Database)    │
-                       └─────────────────┘
+                                │                       │
+                                ▼                       ▼
+                       ┌─────────────────┐    ┌─────────────────┐
+                       │    Consumer     │───▶│   PostgreSQL    │
+                       │    Service      │    │   (Database)    │
+                       └─────────────────┘    └─────────────────┘
+                                │                       │
+                                ▼                       ▼
+                       ┌─────────────────┐    ┌─────────────────┐
+                       │      Redis      │◄───│   Streamlit     │
+                       │     (Cache)     │    │   Dashboard     │
+                       └─────────────────┘    └─────────────────┘
 ```
 
 ## Features
