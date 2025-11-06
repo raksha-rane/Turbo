@@ -2,6 +2,7 @@ pipeline {
     agent any
     
     environment {
+        PATH = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
         DOCKER_REGISTRY = "raksharane"  // Docker Hub registry
         PROJECT_NAME = "aircraft-engine-monitoring"
         DOCKER_COMPOSE_FILE = "docker-compose.yml"
