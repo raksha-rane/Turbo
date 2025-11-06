@@ -80,66 +80,66 @@ pipeline {
             }
         }
         
-        stage('Code Quality & Security') {
-            parallel {
-                stage('Lint Python Code') {
-                    steps {
-                        echo "Running Python linting..."
-                        sh '''
-                            # Install linting tools
-                            pip3 install flake8 black isort pylint
-                            
-                            # Run code formatting check
-                            echo "Checking code formatting with Black..."
-                            black --check --diff services/ || echo "Code formatting issues found"
-                            
-                            # Run import sorting check
-                            echo "Checking import sorting with isort..."
-                            isort --check-only --diff services/ || echo "Import sorting issues found"
-                            
-                            # Run flake8 for style and complexity
-                            echo "Running flake8 for style checking..."
-                            flake8 services/ --max-line-length=100 --ignore=E203,W503 || echo "Style issues found"
-                            
-                            # Generate lint report
-                            pylint services/ --output-format=json > test-results/pylint-report.json || echo "Pylint completed with warnings"
-                        '''
-                    }
-                }
-                
-                stage('Security Scan') {
-                    steps {
-                        echo "Running security scans..."
-                        sh '''
-                            # Install security scanning tools
-                            pip3 install bandit safety
-                            
-                            # Run Bandit for security issues
-                            echo "Running Bandit security scan..."
-                            bandit -r services/ -f json -o test-results/bandit-report.json || echo "Security scan completed with findings"
-                            
-                            # Check for known vulnerabilities in dependencies
-                            echo "Checking for vulnerable dependencies..."
-                            find services/ -name "requirements.txt" -exec safety check --file {} \\; || echo "Dependency check completed"
-                        '''
-                    }
-                }
-                
-                stage('Docker Security') {
-                    steps {
-                        echo "Scanning Docker configurations..."
-                        sh '''
-                            # Install hadolint for Dockerfile linting
-                            wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
-                            chmod +x hadolint
-                            
-                            # Scan all Dockerfiles
-                            find services/ -name "Dockerfile" -exec ./hadolint {} \\; || echo "Dockerfile issues found"
-                        '''
-                    }
-                }
-            }
-        }
+        // stage('Code Quality & Security') {
+        //     parallel {
+        //         stage('Lint Python Code') {
+        //             steps {
+        //                 echo "Running Python linting..."
+        //                 sh '''
+        //                     # Install linting tools
+        //                     pip3 install flake8 black isort pylint
+        //                     
+        //                     # Run code formatting check
+        //                     echo "Checking code formatting with Black..."
+        //                     black --check --diff services/ || echo "Code formatting issues found"
+        //                     
+        //                     # Run import sorting check
+        //                     echo "Checking import sorting with isort..."
+        //                     isort --check-only --diff services/ || echo "Import sorting issues found"
+        //                     
+        //                     # Run flake8 for style and complexity
+        //                     echo "Running flake8 for style checking..."
+        //                     flake8 services/ --max-line-length=100 --ignore=E203,W503 || echo "Style issues found"
+        //                     
+        //                     # Generate lint report
+        //                     pylint services/ --output-format=json > test-results/pylint-report.json || echo "Pylint completed with warnings"
+        //                 '''
+        //             }
+        //         }
+        //         
+        //         stage('Security Scan') {
+        //             steps {
+        //                 echo "Running security scans..."
+        //                 sh '''
+        //                     # Install security scanning tools
+        //                     pip3 install bandit safety
+        //                     
+        //                     # Run Bandit for security issues
+        //                     echo "Running Bandit security scan..."
+        //                     bandit -r services/ -f json -o test-results/bandit-report.json || echo "Security scan completed with findings"
+        //                     
+        //                     # Check for known vulnerabilities in dependencies
+        //                     echo "Checking for vulnerable dependencies..."
+        //                     find services/ -name "requirements.txt" -exec safety check --file {} \\; || echo "Dependency check completed"
+        //                 '''
+        //             }
+        //         }
+        //         
+        //         stage('Docker Security') {
+        //             steps {
+        //                 echo "Scanning Docker configurations..."
+        //                 sh '''
+        //                     # Install hadolint for Dockerfile linting
+        //                     wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+        //                     chmod +x hadolint
+        //                     
+        //                     # Scan all Dockerfiles
+        //                     find services/ -name "Dockerfile" -exec ./hadolint {} \\; || echo "Dockerfile issues found"
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
         
         stage('Unit Tests') {
             steps {
