@@ -1,0 +1,177 @@
+version: '3.8'
+
+services:
+  # Kafka in KRaft mode (no Zookeeper)
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - monitoring_network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_DB: aircraft_monitoring
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d aircraft_monitoring"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - monitoring_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - monitoring_network
+
+  # Data Simulator Service
+  data-simulator:
+    build:
+      context: ./services/data-simulator
+      dockerfile: Dockerfile
+    container_name: data-simulator
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TELEMETRY_TOPIC=engine-telemetry
+      - SIMULATION_INTERVAL=2
+      - NUM_ENGINES=10
+    depends_on:
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+    networks:
+      - monitoring_network
+    restart: unless-stopped
+
+  # ML Service
+  ml-service:
+    build:
+      context: ./services/ml-service
+      dockerfile: Dockerfile
+    container_name: ml-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TELEMETRY_TOPIC=engine-telemetry
+      - KAFKA_PREDICTIONS_TOPIC=engine-predictions
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    networks:
+      - monitoring_network
+    restart: unless-stopped
+
+  # Consumer Service
+  consumer-service:
+    build:
+      context: ./services/consumer-service
+      dockerfile: Dockerfile
+    container_name: consumer-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TELEMETRY_TOPIC=engine-telemetry
+      - KAFKA_PREDICTIONS_TOPIC=engine-predictions
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=aircraft_monitoring
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secure_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - monitoring_network
+    restart: unless-stopped
+
+  # Streamlit Dashboard
+  dashboard:
+    build:
+      context: ./services/dashboard
+      dockerfile: Dockerfile
+    container_name: dashboard
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=aircraft_monitoring
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secure_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - STREAMLIT_PORT=8501
+    ports:
+      - "8501:8501"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - monitoring_network
+    restart: unless-stopped
+
+volumes:
+  kafka_data:
+  postgres_data:
+  redis_data:
+
+networks:
+  monitoring_network:
+    driver: bridge
