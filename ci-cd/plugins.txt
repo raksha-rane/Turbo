@@ -1,0 +1,80 @@
+# Jenkins Plugins Configuration
+# Essential plugins for the Aircraft Engine Monitoring CI/CD pipeline
+
+# Core plugins
+workflow-aggregator:latest
+pipeline-stage-view:latest
+pipeline-rest-api:latest
+pipeline-build-step:latest
+
+# SCM plugins
+git:latest
+github:latest
+github-branch-source:latest
+github-oauth:latest
+
+# Build and deployment
+docker-workflow:latest
+docker-plugin:latest
+kubernetes:latest
+ansible:latest
+
+# Testing and quality
+junit:latest
+jacoco:latest
+cobertura:latest
+checkstyle:latest
+warnings-ng:latest
+sonar:latest
+
+# Notifications
+email-ext:latest
+slack:latest
+build-monitor-plugin:latest
+
+# Security
+matrix-auth:latest
+authorize-project:latest
+credentials:latest
+credentials-binding:latest
+
+# Utilities
+timestamper:latest
+build-timeout:latest
+ws-cleanup:latest
+ant:latest
+gradle:latest
+nodejs:latest
+python:latest
+
+# Configuration as Code
+configuration-as-code:latest
+job-dsl:latest
+
+# Dashboard and visualization
+dashboard-view:latest
+build-pipeline-plugin:latest
+delivery-pipeline-plugin:latest
+
+# Monitoring
+prometheus:latest
+datadog:latest
+
+# Deployment
+deploy:latest
+ssh-slaves:latest
+ssh-agent:latest
+
+# File operations
+copyartifact:latest
+artifact-deployer:latest
+publish-over-ssh:latest
+
+# Version control
+subversion:latest
+mercurial:latest
+
+# Build tools
+maven-plugin:latest
+gradle:latest
+xvfb:latest

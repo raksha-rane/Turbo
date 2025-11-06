@@ -1,13 +1,32 @@
-# Real-Time Aircraft Engine Monitoring & Predictive Maintenance System
+# Real-Time Aircraft Engine Monitoring and Predictive Maintenance System
 
-A comprehensive, production-ready system for monitoring aircraft engine health in real-time using machine learning for predictive maintenance. Built with modern DevOps practices including containerization, CI/CD pipelines, and automated testing.
+A comprehensive microservices-based system for real-time aircraft engine monitoring and predictive maintenance using machine learning and DevOps best practices.
 
-## System Architecture
+## System Overview
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Data          │    │     Kafka       │    │   ML Service   │
-│   Simulator     ├────┤   (KRaft Mode)  ├────┤   (RUL Pred.)  │
+This system provides:
+- **Real-time telemetry simulation** based on NASA C-MAPSS dataset
+- **Machine learning predictions** for Remaining Useful Life (RUL) and anomaly detection
+- **Real-time data processing** with Apache Kafka streaming
+- **Interactive dashboard** with clean, minimal UI design
+- **Automated CI/CD pipeline** with Jenkins
+- **Scalable containerized architecture** with Docker Compose
+
+## Architecture
+
+### Microservices
+- **Data Simulator**: Generates realistic engine telemetry data
+- **ML Service**: Provides RUL predictions and anomaly detection
+- **Consumer Service**: Processes telemetry and stores results
+- **Dashboard**: Real-time monitoring interface
+
+### Infrastructure
+- **Apache Kafka**: Real-time data streaming (KRaft mode, no Zookeeper)
+- **PostgreSQL**: Persistent data storage
+- **Redis**: Caching and real-time data access
+- **Jenkins**: CI/CD automation
+- **Docker Compose**: Service orchestration
+
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                 │                       │
                                 │                       ▼
@@ -25,30 +44,29 @@ A comprehensive, production-ready system for monitoring aircraft engine health i
 
 ## Features
 
-### 🔄 Real-Time Data Processing
-- **High-frequency telemetry ingestion** via Apache Kafka (KRaft mode)
-- **26 sensor monitoring** based on NASA C-MAPSS dataset structure
-- **Real-time data streaming** with configurable intervals
+### Machine Learning
+- **RUL Prediction**: Random Forest model for remaining useful life estimation
+- **Anomaly Detection**: Isolation Forest for identifying abnormal behavior
+- **Feature Engineering**: Rolling statistics, trends, and degradation patterns
+- **Model Monitoring**: Automated retraining and performance tracking
 
-### 🤖 Machine Learning & Analytics
-- **RUL (Remaining Useful Life) prediction** using Random Forest algorithms
-- **Anomaly detection** with Isolation Forest
-- **Automated model retraining** via CI/CD pipelines
-- **Confidence scoring** for predictions
+### Real-time Processing
+- **Streaming Data**: Kafka-based telemetry processing
+- **Caching**: Redis for fast data access
+- **Scalability**: Horizontal scaling support
+- **Fault Tolerance**: Comprehensive error handling
 
-### 📊 Interactive Dashboard
-- **Real-time visualization** with Streamlit
-- **Engine health monitoring** with status indicators
-- **Sensor data charts** and trend analysis
-- **Alert management** with severity levels
-- **System health metrics** and monitoring
+### Monitoring Dashboard
+- **Real-time Charts**: Engine health and performance metrics
+- **Professional UI**: Clean, minimal design without emojis
+- **Alert System**: Proactive maintenance notifications
+- **Historical Analysis**: Trend analysis and reporting
 
-### 🚀 DevOps & Automation
-- **Containerized microservices** with Docker
-- **CI/CD pipeline** with Jenkins
-- **Automated testing** (unit, integration, security)
-- **Infrastructure as Code** with Docker Compose
-- **Health checks** and monitoring
+### DevOps
+- **Automated CI/CD**: Jenkins pipeline with testing and deployment
+- **Security Scanning**: Integrated security checks
+- **Environment Management**: Development, staging, production configs
+- **Health Monitoring**: Service health checks and metrics
 
 ## Quick Start
 

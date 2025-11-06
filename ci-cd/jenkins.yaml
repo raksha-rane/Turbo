@@ -1,0 +1,162 @@
+# Jenkins Configuration as Code (JCasC)
+# Configures Jenkins automatically for the Aircraft Engine Monitoring project
+
+jenkins:
+  systemMessage: "Aircraft Engine Monitoring CI/CD Server"
+  numExecutors: 4
+  mode: NORMAL
+  
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+       - id: "admin"
+         password: "${JENKINS_ADMIN_PASSWORD:-admin123}"
+         
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+  remotingSecurity:
+    enabled: true
+
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: "DOCKER_HOST"
+            value: "unix:///var/run/docker.sock"
+          - key: "PROJECT_NAME"
+            value: "aircraft-engine-monitoring"
+
+tool:
+  git:
+    installations:
+      - name: "Default"
+        home: "/usr/bin/git"
+        
+  dockerTool:
+    installations:
+      - name: "docker"
+        home: "/usr/bin/docker"
+
+  python:
+    installations:
+      - name: "Python 3"
+        home: "/usr/bin/python3"
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: "github-credentials"
+              username: "${GITHUB_USERNAME}"
+              password: "${GITHUB_TOKEN}"
+              description: "GitHub credentials for repository access"
+              
+          - usernamePassword:
+              scope: GLOBAL
+              id: "docker-registry-credentials"
+              username: "${DOCKER_REGISTRY_USERNAME}"
+              password: "${DOCKER_REGISTRY_PASSWORD}"
+              description: "Docker registry credentials"
+              
+          - string:
+              scope: GLOBAL
+              id: "slack-token"
+              secret: "${SLACK_TOKEN}"
+              description: "Slack notification token"
+
+jobs:
+  - script: >
+      pipelineJob('aircraft-engine-monitoring-pipeline') {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('${GITHUB_REPO_URL}')
+                  credentials('github-credentials')
+                }
+                branches('*/main')
+                scriptPath('Jenkinsfile')
+              }
+            }
+          }
+        }
+        triggers {
+          githubPush()
+          cron('H 2 * * *') // Daily build at 2 AM
+        }
+        parameters {
+          choiceParam('DEPLOY_ENVIRONMENT', ['development', 'staging', 'production'], 'Target deployment environment')
+          booleanParam('RETRAIN_MODELS', false, 'Trigger ML model retraining')
+          booleanParam('RUN_INTEGRATION_TESTS', true, 'Run integration tests')
+        }
+      }
+
+  - script: >
+      pipelineJob('model-retraining-job') {
+        definition {
+          cps {
+            script('''
+              pipeline {
+                agent any
+                triggers {
+                  cron('H 6 * * 0') // Weekly on Sunday at 6 AM
+                }
+                stages {
+                  stage('Retrain Models') {
+                    steps {
+                      build job: 'aircraft-engine-monitoring-pipeline', parameters: [
+                        string(name: 'DEPLOY_ENVIRONMENT', value: 'development'),
+                        booleanParam(name: 'RETRAIN_MODELS', value: true)
+                      ]
+                    }
+                  }
+                }
+              }
+            ''')
+            sandbox()
+          }
+        }
+      }
+
+unclassified:
+  location:
+    url: "${JENKINS_URL:-http://localhost:8080/}"
+    adminAddress: "${JENKINS_ADMIN_EMAIL:-admin@company.com}"
+    
+  globalLibraries:
+    libraries:
+      - name: "shared-pipeline-library"
+        defaultVersion: "main"
+        retriever:
+          modernSCM:
+            scm:
+              git:
+                remote: "${SHARED_LIBRARY_REPO_URL}"
+                credentialsId: "github-credentials"
+                
+  slackNotifier:
+    baseUrl: "https://hooks.slack.com/services/"
+    teamDomain: "${SLACK_TEAM_DOMAIN}"
+    token: "${SLACK_TOKEN}"
+    room: "${SLACK_DEFAULT_CHANNEL:-#devops-alerts}"
+    
+  email-ext:
+    defaultSubject: "$PROJECT_NAME - Build $BUILD_STATUS - $BUILD_NUMBER"
+    defaultBody: |
+      Build: $BUILD_NUMBER
+      Status: $BUILD_STATUS
+      Project: $PROJECT_NAME
+      
+      Changes:
+      $CHANGES
+      
+      Build URL: $BUILD_URL
+    smtpServer: "${SMTP_SERVER}"
+    smtpPort: "${SMTP_PORT:-587}"
+    useSsl: true
+    charset: "UTF-8"

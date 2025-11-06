@@ -1,9 +1,8 @@
-# Ignore Python bytecode
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Distribution / packaging
+*.so
 .Python
 build/
 develop-eggs/
@@ -22,12 +21,18 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# Unit test / coverage reports
+# Testing
 htmlcov/
 .tox/
 .nox/
@@ -42,23 +47,16 @@ coverage.xml
 .pytest_cache/
 test-results/
 
-# Virtual environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
 # IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.project
+.pydevproject
 
-# OS generated files
+# OS files
 .DS_Store
 .DS_Store?
 ._*
@@ -67,28 +65,29 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# Docker
-.dockerignore
-
-# Logs
+# Logs and databases
 logs/
 *.log
-
-# Database
 *.db
 *.sqlite3
 
-# Models and artifacts
+# Docker
+.dockerignore
+
+# Models and artifacts (generated at runtime)
 models/*.pkl
 models/*.joblib
+models/*.h5
+models/*.pth
 artifacts/
 
 # Temporary files
 tmp/
 temp/
 .tmp/
+*.tmp
 
-# Environment files (keep template)
+# Environment files (keep .env.example for reference)
 .env.local
 .env.production
 .env.staging
@@ -98,6 +97,31 @@ temp/
 
 # Docker volumes data
 postgres_data/
+kafka_data/
+redis_data/
+
+# Backup files
+backup_*/
+*.bak
+*.backup
+
+# Jenkins local data
+.jenkins/
+
+# Compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Project specific
+CLEANUP_PLAN.md
+cleanup.sh
 kafka_data/
 redis_data/
 

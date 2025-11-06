@@ -9,11 +9,10 @@ import redis
 from datetime import datetime, timedelta
 from kafka import KafkaConsumer, KafkaProducer
 from kafka.errors import KafkaError
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, IsolationForest
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error
-from sklearn.isolation import IsolationForest
 import signal
 import sys
 from typing import Dict, List, Optional, Tuple
@@ -235,9 +234,9 @@ class MLService:
             
             logger.info(f"RUL Model - MSE: {mse:.2f}, MAE: {mae:.2f}")
             
-            # Train anomaly detection model
+            # Train anomaly detection model with lower contamination for demo
             self.anomaly_model = IsolationForest(
-                contamination=0.1,
+                contamination=0.01,  # Expect only 1% anomalies (less sensitive)
                 random_state=42,
                 n_jobs=-1
             )
@@ -374,12 +373,12 @@ class MLService:
             anomaly_score = 0.0
             if self.anomaly_model:
                 anomaly_pred = self.anomaly_model.predict(features_scaled)[0]
-                is_anomaly = (anomaly_pred == -1)
+                is_anomaly = bool(anomaly_pred == -1)  # Convert numpy bool to Python bool
                 
                 # Get anomaly score
                 try:
                     anomaly_score = self.anomaly_model.decision_function(features_scaled)[0]
-                    anomaly_score = max(0.0, min(1.0, (anomaly_score + 0.5) * 2))  # Normalize to 0-1
+                    anomaly_score = float(max(0.0, min(1.0, (anomaly_score + 0.5) * 2)))  # Normalize to 0-1
                 except:
                     anomaly_score = 0.5
             
@@ -387,11 +386,11 @@ class MLService:
             prediction = {
                 'engine_id': engine_id,
                 'timestamp': telemetry['timestamp'],
-                'predicted_rul': predicted_rul,
-                'confidence': round(confidence, 3),
-                'anomaly_score': round(anomaly_score, 3),
+                'predicted_rul': int(predicted_rul) if predicted_rul is not None else None,
+                'confidence': round(float(confidence), 3),
+                'anomaly_score': round(float(anomaly_score), 3),
                 'is_anomaly': is_anomaly,
-                'cycle': telemetry.get('cycle', 0)
+                'cycle': int(telemetry.get('cycle', 0))
             }
             
             return prediction

@@ -1,0 +1,77 @@
+{
+  "model_versions": {
+    "current": "1.0",
+    "supported": ["1.0"]
+  },
+  
+  "rul_model": {
+    "algorithm": "RandomForestRegressor",
+    "parameters": {
+      "n_estimators": 100,
+      "max_depth": 15,
+      "min_samples_split": 2,
+      "min_samples_leaf": 1,
+      "random_state": 42,
+      "n_jobs": -1
+    },
+    "performance_thresholds": {
+      "min_r2_score": 0.7,
+      "max_rmse": 50.0,
+      "max_mae": 30.0
+    }
+  },
+  
+  "anomaly_model": {
+    "algorithm": "IsolationForest",
+    "parameters": {
+      "contamination": 0.1,
+      "random_state": 42,
+      "n_jobs": -1
+    },
+    "performance_thresholds": {
+      "min_anomaly_rate": 0.05,
+      "max_anomaly_rate": 0.2
+    }
+  },
+  
+  "feature_engineering": {
+    "window_sizes": {
+      "rolling_mean": 5,
+      "rolling_std": 5,
+      "trend_window": 10
+    },
+    "feature_types": [
+      "raw_sensors",
+      "rolling_statistics",
+      "trend_features"
+    ]
+  },
+  
+  "training_config": {
+    "validation_split": 0.2,
+    "cross_validation_folds": 3,
+    "hyperparameter_tuning": true,
+    "feature_selection": false
+  },
+  
+  "operational_config": {
+    "prediction_confidence_threshold": 0.8,
+    "anomaly_score_threshold": -0.5,
+    "model_update_frequency_hours": 24,
+    "feature_window_size": 50,
+    "min_data_points_for_prediction": 5
+  },
+  
+  "data_preprocessing": {
+    "scaling": "StandardScaler",
+    "missing_value_strategy": "fill_zero",
+    "outlier_detection": false
+  },
+  
+  "model_persistence": {
+    "format": "joblib",
+    "compression": false,
+    "backup_enabled": true,
+    "max_backup_versions": 5
+  }
+}
