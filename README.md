@@ -382,10 +382,6 @@ docker-compose restart dashboard
 - Write comprehensive tests
 - Update documentation
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## Acknowledgments
 
 - NASA C-MAPSS dataset for training data
